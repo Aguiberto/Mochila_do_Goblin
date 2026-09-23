@@ -18,3 +18,11 @@ class ItemSerializer(serializers.ModelSerializer):
             'estoque'
             'preco_venda'
         ]
+
+class OperacaoItemSerializer(serializers.Serializer):
+    '''
+    Serializer para receber a quantidade nas operações de compra/venda"
+    '''
+
+    quantidade = serializers.IntegerField(min_value=1, default=1)
+    

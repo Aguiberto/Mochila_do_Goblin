@@ -6,7 +6,7 @@ from decimal import Decimal
 class Item(models.Model):
 
     nome = models.CharField(max_length=100)
-    descricao = models.TextField(blank=True help_text="Descrição do item")
+    descricao = models.TextField(blank=True, help_text="Descrição do item")
     estoque = models.PositiveBigIntegerField(default=0)
     preco_compra = models.DecimalField(
         max_digits=10, 
@@ -20,9 +20,11 @@ class Item(models.Model):
         '''
         O valor do item vai 10% na sua venda
         '''
+        if self.preco_compra is None:
+            return Decimal("0.00")
 
         fator = Decimal("0.90")
         return (self.preco_compra * fator).quantize(Decimal("0.01"))    
 
     def __str__(self):
-            return f"Nome: {self.nome} | Estoque: {self.estoque}"
+        return f"Nome: {self.nome} | Estoque: {self.estoque}"
