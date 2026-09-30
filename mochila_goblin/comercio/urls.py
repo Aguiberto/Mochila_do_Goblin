@@ -1,7 +1,7 @@
-from rest_framework.routers import DefaultRouter
-from .views import ItemView
+from django.urls import path
+from .views import CompraItemView
 
-router = DefaultRouter()
-router.register(r'itens',ItemView, basename='item')
 
-urlpatterns = router.urls
+urlpatterns = [
+    path('comprar/',CompraItemView.as_view(), name='comprar'),
+]

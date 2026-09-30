@@ -1,8 +1,14 @@
-from rest_framework import status, viewsets
-from rest_framework.decorators import action
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import ValidationError
+from django.db import transaction
+from django.shortcuts import get_object_or_404
+
+from .serializers import OperacaoSerializer
+from .models import Aventureiro, Item
+from .services import Services
 
 
 
@@ -10,4 +16,30 @@ from rest_framework.permissions import IsAuthenticated
 
 class CompraItemView(APIView):
 
-    permission_classes = [IsAuthenticated]    
+    '''
+    Realiza o processamento da compra de um item
+    '''
+    permission_classes = [IsAuthenticated]
+
+    @transaction.atomic
+    def post(self,request):
+
+        serializer = OperacaoSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        item_id = serializer.validated_data['item_id']
+        qtd_itens = serializer.validated_data['quantidade']
+
+        aventureiro,_ = Aventureiro.objects.get_or_create(usuario=request.user)
+        item = get_object_or_404(Item, pk=item_id)
+
+        try:
+            Services.comprar_item(item, qtd_itens, aventureiro)
+            return Response({"mensagem": "Compra realizada com sucesso!",
+                             "saldo": aventureiro.moedas_draconicas,
+                             "estoque_goblin": item.estoque},
+                             status=status.HTTP_200_OK)
+        except ValidationError as e:
+            return Response({"erro": str(e.detail)},status=status.HTTP_400_BAD_REQUEST)
+
