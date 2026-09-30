@@ -16,6 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from gateway.views import ProxyNegociarView, ProxyVerMochila
+
 from rest_framework_simplejwt.views import(
     TokenObtainPairView,
     TokenRefreshView)
@@ -31,12 +33,16 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # Endpoints JWT
-    path('api/v1/token',TokenObtainPairView.as_view(), name = 'token_obtain_pair'),
+    path('api/v1/token',TokenObtainPairView.as_view(), name = 'par_token'),
     path('api/v1/token/refresh/', TokenRefreshView.as_view(), name = 'token_refresh'),
 
     #Endpoints do Swaggeer / OpenAPI 3.0
     path('api/v1/schema/',SpectacularAPIView.as_view(),name='schema'),
     path('api/v1/docs/',SpectacularSwaggerView.as_view(url_name='schema'),name='swagger-ui'),
-    path('api/v1/redoc/',SpectacularRedocView.as_view(url_name ='schema'), name ='redoc')
+    path('api/v1/redoc/',SpectacularRedocView.as_view(url_name ='schema'), name ='redoc'),
+
+    # Rotas proxy para os Microserviços
+    path('api/v1/loja/<path:path>', ProxyNegociarView.as_view(), name = 'proxy_negociar' ),
+    path('api/v1/mochila<path:path>',ProxyVerMochila.as_view(),name = 'proxy_mochila'),
 
 ]
