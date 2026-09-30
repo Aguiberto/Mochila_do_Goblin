@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from . models import Item
+from . models import Item, Aventureiro
 
 class ItemSerializer(serializers.ModelSerializer):
 
@@ -19,10 +19,23 @@ class ItemSerializer(serializers.ModelSerializer):
             'preco_venda'
         ]
 
-class OperacaoItemSerializer(serializers.Serializer):
-    '''
-    Serializer para receber a quantidade nas operações de compra/venda"
-    '''
+class OperacaoSerializer(serializers.Serializer):
 
+    '''Serializer apenas para enviar os dados de que item 
+    e quantidade que o usuário deseja negociar
+    '''
+   
+    item_id = serializers.IntegerField()
     quantidade = serializers.IntegerField(min_value=1, default=1)
-    
+
+class AventureiroSerializer(serializers.ModelSerializer):
+
+    nome = serializers.CharField(source = 'usuario.username', read_only = True)
+
+    class Meta:
+        model = Aventureiro
+        fields = [
+            'id',
+            'nome',
+            'moedas_draconianas'
+        ]
