@@ -15,6 +15,10 @@ class ItemView(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'], serializer_class=OperacaoItemSerializer)
     def comprar(self, request, pk=None):
 
+        '''
+        Nessa operação o usuário compra itens da loja
+        '''
+
         item = self.get_object()
         serializer = OperacaoItemSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -26,18 +30,22 @@ class ItemView(viewsets.ModelViewSet):
                 {"Erro": f"Estoque insulficiente. Apenas{item.estoque} unides disponiveis"},
                 status = status.HTTP_400_BAD_REQUEST
             )
-        item.estoque -+ qtd
+        item.estoque -= qtd
         item.save()
 
         total_pago = item.preco_compra * qtd
 
-        return Responde({
+        return Response({
             "mensagem": f"Compra de {qtd}x '{item.nome}' realizada com sucesso!",
             "valor_total_pago": float(total_pago),
             "item": ItemSerializer(item).data
         }, status=status.HTTP_200_OK)
 
     def vender(self, request, pk=None):
+
+        '''
+        Nessa view o usuário vende seus itens para a loja
+        '''
 
         item = self.get_object()
         serializer = OperacaoItemSerializer(data = resquest.data)
