@@ -1,9 +1,13 @@
 from .models import Transacao
 from rest_framework.exceptions import ValidationError
+import requests
+
+URL_SERVICO_MOCHILA = "http://localhost:8002/api/v1/mochila/atualizar/"
 
 class Services():
 
-    def comprar_item(item, qtd_solicitada, aventureiro):
+    @staticmethod
+    def comprar_item(item, qtd_solicitada, aventureiro, auth_header):
 
         # validação de estoque
         if item.estoque < qtd_solicitada:
@@ -15,6 +19,16 @@ class Services():
         if aventureiro.moedas_draconicas < custo_total:
             raise ValidationError(" Moedas insulficiente, vá caçar ou buscar espólios!")
 
+        # Envia o token para o Ver Mochila Service (:8002) saber de quem é a mochila!
+        headers = {'Authorization': auth_header}
+        payload = {
+            'item_id': item.id,
+            'nome_item': item.nome,
+            'quantidade': qtd_solicitada,
+            'operacao': 'ADICIONAR'
+        }
+        res = requests.post(URL_SERVICO_MOCHILA, json=payload, headers=headers, timeout=5)
+        
         # atualiza o as moedas do aventureiro
         aventureiro.moedas_draconicas -= custo_total
         aventureiro.save()
