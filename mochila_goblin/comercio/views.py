@@ -33,9 +33,10 @@ class CompraItemView(APIView):
 
         aventureiro,_ = Aventureiro.objects.get_or_create(usuario=request.user)
         item = get_object_or_404(Item, pk=item_id)
+        auth_header = request.headers.get('Authorization')
 
         try:
-            Services.comprar_item(item, qtd_itens, aventureiro)
+            Services.comprar_item(item, qtd_itens, aventureiro, auth_header)
             return Response({"mensagem": "Compra realizada com sucesso!",
                              "saldo": aventureiro.moedas_draconicas,
                              "estoque_goblin": item.estoque},
