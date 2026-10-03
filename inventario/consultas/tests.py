@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.test import TestCase
+from django.urls import resolve
 from rest_framework.test import APIRequestFactory
 from rest_framework_simplejwt.tokens import AccessToken
 
@@ -161,3 +162,14 @@ class MochilaAPITests(TestCase):
         request = self.factory.get("/", HTTP_AUTHORIZATION="Bearer token.invalido")
         response = ConsultarMochilaView.as_view()(request)
         self.assertEqual(response.status_code, 401)
+
+
+class MochilaURLTests(TestCase):
+    def test_rotas_de_consulta_e_atualizacao_resolvem(self):
+        consulta = resolve("/api/v1/")
+        atualizacao = resolve("/api/v1/atualizar/")
+
+        self.assertEqual(consulta.url_name, "mochila-consultar")
+        self.assertIs(consulta.func.view_class, ConsultarMochilaView)
+        self.assertEqual(atualizacao.url_name, "mochila-atualizar")
+        self.assertIs(atualizacao.func.view_class, AtualizarMochilaView)
