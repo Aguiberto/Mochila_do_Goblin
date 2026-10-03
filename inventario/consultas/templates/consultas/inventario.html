@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#151b19">
+  <title>Mochila do Aventureiro</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #111715;
+      color: #f3ecd9;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      --muted: #a6b0a6;
+      --line: rgba(223, 197, 133, .2);
+      --gold: #e5bd68;
+      --green: #a7c58b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      background:
+        radial-gradient(ellipse at 50% -18%, rgba(90, 116, 74, .3), transparent 55%),
+        #111715;
+    }
+
+    .shell {
+      width: min(100% - 32px, 920px);
+      margin: 0 auto;
+      padding: 58px 0 72px;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--gold);
+      font-size: .75rem;
+      font-weight: 750;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.2rem, 7vw, 4.25rem);
+      font-weight: 600;
+      letter-spacing: -.045em;
+    }
+
+    .intro {
+      max-width: 620px;
+      margin: 14px 0 30px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .panel {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(27, 35, 31, .88);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, .24);
+    }
+
+    .auth {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: end;
+      padding: 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #d7d1bd;
+      font-size: .88rem;
+      font-weight: 650;
+    }
+
+    input {
+      width: 100%;
+      min-height: 46px;
+      padding: 0 13px;
+      border: 1px solid rgba(212, 218, 202, .2);
+      border-radius: 10px;
+      outline: none;
+      background: #121815;
+      color: #f3ecd9;
+      font: inherit;
+    }
+
+    input:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(167, 197, 139, .16);
+    }
+
+    button {
+      min-height: 46px;
+      padding: 0 18px;
+      border: 0;
+      border-radius: 10px;
+      background: var(--gold);
+      color: #241d10;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 750;
+      transition: filter .16s ease, transform .16s ease;
+    }
+
+    button:hover:not(:disabled) {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      cursor: wait;
+      opacity: .65;
+    }
+
+    .hint {
+      grid-column: 1 / -1;
+      margin: -3px 0 0;
+      color: var(--muted);
+      font-size: .8rem;
+      line-height: 1.5;
+    }
+
+    .inventory-heading {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: baseline;
+      padding: 22px 22px 14px;
+    }
+
+    h2 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.35rem;
+      font-weight: 600;
+    }
+
+    .count {
+      color: var(--muted);
+      font-size: .85rem;
+    }
+
+    .notice {
+      min-height: 24px;
+      margin: 0 22px 14px;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    .notice[data-state="error"] { color: #ff9a88; }
+    .notice[data-state="success"] { color: var(--green); }
+
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 15px 22px;
+      border-top: 1px solid rgba(223, 197, 133, .12);
+    }
+
+    th {
+      color: var(--muted);
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .11em;
+      text-transform: uppercase;
+    }
+
+    td { color: #ece6d5; }
+    td:last-child, th:last-child { text-align: right; }
+
+    .quantity {
+      display: inline-grid;
+      min-width: 42px;
+      min-height: 32px;
+      padding: 0 9px;
+      place-items: center;
+      border: 1px solid rgba(167, 197, 139, .25);
+      border-radius: 999px;
+      background: rgba(167, 197, 139, .09);
+      color: var(--green);
+      font-weight: 750;
+    }
+
+    .empty {
+      display: none;
+      padding: 28px 22px 34px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .empty.is-visible { display: block; }
+
+    @media (max-width: 600px) {
+      .shell { padding-top: 36px; }
+      .auth { grid-template-columns: 1fr; padding: 18px; }
+      .hint { grid-column: auto; }
+      .inventory-heading { padding: 20px 18px 12px; }
+      .notice { margin-inline: 18px; }
+      th, td { padding: 13px 15px; }
+      th:first-child, td:first-child { padding-left: 18px; }
+      th:last-child, td:last-child { padding-right: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <p class="eyebrow">Registro de expedição</p>
+    <h1>Mochila do Aventureiro</h1>
+    <p class="intro">
+      Seus achados, poções e relíquias reunidos em um só lugar. Informe um access
+      token válido para consultar os itens vinculados à sua conta.
+    </p>
+
+    <section class="panel" aria-labelledby="inventory-title">
+      <form class="auth" id="inventory-form">
+        <div>
+          <label for="access-token">Access token</label>
+          <input
+            id="access-token"
+            name="access-token"
+            type="password"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="Cole aqui o token de acesso JWT"
+            required
+          >
+        </div>
+        <button id="load-button" type="submit">Consultar mochila</button>
+        <p class="hint">Use o access token obtido pelo login da loja. O token fica apenas nesta página e não é salvo.</p>
+      </form>
+
+      <div class="inventory-heading">
+        <h2 id="inventory-title">Itens carregados</h2>
+        <span class="count" id="item-count">—</span>
+      </div>
+      <p class="notice" id="notice" role="status" aria-live="polite">
+        Informe seu token para carregar a mochila.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Item</th>
+              <th scope="col">Código</th>
+              <th scope="col">Quantidade</th>
+            </tr>
+          </thead>
+          <tbody id="item-list"></tbody>
+        </table>
+      </div>
+      <p class="empty" id="empty-state">Sua mochila está vazia. Visite a loja para encontrar seus primeiros itens.</p>
+    </section>
+  </main>
+
+  <script>
+    const form = document.querySelector("#inventory-form");
+    const tokenInput = document.querySelector("#access-token");
+    const loadButton = document.querySelector("#load-button");
+    const itemList = document.querySelector("#item-list");
+    const itemCount = document.querySelector("#item-count");
+    const notice = document.querySelector("#notice");
+    const emptyState = document.querySelector("#empty-state");
+    const inventoryEndpoint = window.location.pathname.startsWith("/inventario/")
+      ? "/api/v1/mochila/"
+      : "/api/v1/";
+
+    function setNotice(message, state = "") {
+      notice.textContent = message;
+      notice.dataset.state = state;
+    }
+
+    function addCell(row, value) {
+      const cell = document.createElement("td");
+      cell.textContent = value;
+      row.append(cell);
+      return cell;
+    }
+
+    function showItems(items) {
+      itemList.replaceChildren();
+      itemCount.textContent = `${items.length} ${items.length === 1 ? "item" : "itens"}`;
+      emptyState.classList.toggle("is-visible", items.length === 0);
+
+      for (const item of items) {
+        const row = document.createElement("tr");
+        addCell(row, item.nome_item);
+        addCell(row, `#${item.item_id_loja}`);
+        const quantityCell = addCell(row, "");
+        const quantity = document.createElement("span");
+        quantity.className = "quantity";
+        quantity.textContent = item.quantidade;
+        quantityCell.append(quantity);
+        itemList.append(row);
+      }
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const token = tokenInput.value.trim().replace(/^Bearer\s+/i, "");
+      if (!token) {
+        setNotice("Informe o access token para consultar a mochila.", "error");
+        return;
+      }
+
+      loadButton.disabled = true;
+      setNotice("Consultando sua mochila…");
+
+      try {
+        const response = await fetch(inventoryEndpoint, {
+          headers: { Authorization: `Bearer ${token}` },
+          cache: "no-store",
+        });
+        const contentType = response.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+          throw new Error(
+            `A API retornou uma página HTML em vez de JSON (HTTP ${response.status}). ` +
+            "Abra a tela pelo gateway em /inventario/ ou confira se o serviço está ativo."
+          );
+        }
+        const data = await response.json();
+
+        if (!response.ok) {
+          const detail = data.detail || data.erro || "Não foi possível consultar a mochila.";
+          throw new Error(response.status === 401 ? "Token inválido ou expirado. Obtenha um access token novo e tente novamente." : detail);
+        }
+        if (!Array.isArray(data)) {
+          throw new Error("A resposta recebida da API está em um formato inesperado.");
+        }
+
+        showItems(data);
+        setNotice(data.length ? "Mochila atualizada com sucesso." : "Consulta concluída.", "success");
+      } catch (error) {
+        itemList.replaceChildren();
+        itemCount.textContent = "—";
+        emptyState.classList.remove("is-visible");
+        setNotice(error instanceof TypeError ? "Não foi possível conectar à API do inventário." : error.message, "error");
+      } finally {
+        loadButton.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

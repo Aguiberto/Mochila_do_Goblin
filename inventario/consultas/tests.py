@@ -173,3 +173,10 @@ class MochilaURLTests(TestCase):
         self.assertIs(consulta.func.view_class, ConsultarMochilaView)
         self.assertEqual(atualizacao.url_name, "mochila-atualizar")
         self.assertIs(atualizacao.func.view_class, AtualizarMochilaView)
+
+    def test_tela_de_inventario_abre_sem_autenticacao(self):
+        response = self.client.get("/api/v1/tela/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Mochila do Aventureiro")
+        self.assertContains(response, "/api/v1/mochila/")

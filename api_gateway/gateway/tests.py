@@ -13,6 +13,7 @@ from .views import (
     ProxyTokenRefreshView,
     ProxyTokenView,
     ProxyVendaView,
+    proxy_tela_inventario,
 )
 
 
@@ -81,6 +82,24 @@ class PublicRouteMappingTests(SimpleTestCase):
                 match = resolve(path)
                 self.assertEqual(match.url_name, expected_name)
                 self.assertIs(match.func.view_class, expected_view)
+
+    @patch("gateway.views.requests.get")
+    def test_tela_do_inventario_encaminha_html_do_servico(self, mock_get):
+        remote_response = Mock()
+        remote_response.content = b"<html>Inventario</html>"
+        remote_response.headers = {"Content-Type": "text/html; charset=utf-8"}
+        remote_response.status_code = 200
+        mock_get.return_value = remote_response
+
+        response = proxy_tela_inventario(self.factory.get("/inventario/"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b"<html>Inventario</html>")
+        self.assertEqual(response["Content-Type"], "text/html; charset=utf-8")
+        mock_get.assert_called_once_with(
+            "http://localhost:8002/api/v1/tela/",
+            timeout=5,
+        )
 
     @patch("gateway.views.requests.post")
     def test_compra_e_venda_encaminham_paths_sem_prefixo_publico(self, mock_post):

@@ -6,10 +6,15 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers
+from django.shortcuts import render
 
 from .models import ItemMochila
 from .serializers import ItemMochilaSerializer, AtualizarMochilaSerializer
 from .services import MochilaServices
+
+
+def tela_inventario(request):
+    return render(request, "consultas/inventario.html")
 
 
 class ConsultarMochilaView(APIView):

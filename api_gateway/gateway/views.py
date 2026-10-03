@@ -1,4 +1,5 @@
 import requests
+from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -22,6 +23,29 @@ from .schema import (
 
 NEGOCIAR_SERVICE_URL = "http://localhost:8001"
 MOCHILA_SERVICE_URL = "http://localhost:8002"
+
+
+def proxy_tela_inventario(request):
+    try:
+        response = requests.get(
+            f"{MOCHILA_SERVICE_URL}/api/v1/tela/",
+            timeout=5,
+        )
+    except requests.exceptions.RequestException:
+        return HttpResponse(
+            "Serviço de inventário indisponível.",
+            status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content_type="text/plain; charset=utf-8",
+        )
+
+    return HttpResponse(
+        response.content,
+        status=response.status_code,
+        content_type=response.headers.get(
+            "Content-Type",
+            "text/html; charset=utf-8",
+        ),
+    )
 
 
 class ProxyNegociarView(APIView):

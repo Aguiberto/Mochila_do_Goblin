@@ -1,8 +1,6 @@
 # Mochila do Goblin — 
 
-Este guia descreve como executar o cliente em um computador e os três serviços
-(gateway, loja e inventário) em outro computador na mesma rede local. O cliente
-acessa somente o gateway; a loja e o inventário permanecem internos ao servidor.
+Este guia descreve como executar o cliente em um computador e os três serviços (gateway, loja e inventário) em outro computador na mesma rede local. O cliente acessa somente o gateway; a loja e o inventário permanecem internos ao servidor.
 
 
 ## Topologia e portas
@@ -24,7 +22,6 @@ Copie ou clone o projeto para o servidor. Na raiz `Mochila_do_Goblin/`, crie o
 ambiente virtual e instale as dependências:
 
 ```bash
-cd /caminho/para/Mochila_do_Goblin
 python3 -m venv venv
 venv/bin/pip install -r requirements.txt
 ```
@@ -38,88 +35,79 @@ Gere uma chave para assinar tokens uma única vez:
 openssl rand -hex 32
 ```
 
-Guarde o resultado num local seguro. Use o **mesmo valor** como
-`JWT_SIGNING_KEY` na loja e no inventário. Não o inclua neste README, no código
-ou em arquivos versionados. O gateway não precisa dessa chave.
+ Use o resultado como`JWT_SIGNING_KEY` na loja e no inventário. 
+
+ Abra o terminal de cada projeto, rode o comando a seguir e depois insira a chave. As configurações da loja e do
+inventário exigem `JWT_SIGNING_KEY`, portanto informe a chave em cada terminal:
+
+ ```bash
+
+read -rsp 'JWT_SIGNING_KEY: ' JWT_SIGNING_KEY; echo; export JWT_SIGNING_KEY
+
+```
 
 ## 2. Aplicar as migrações
 
 As migrações criam as tabelas necessárias nos bancos de dados locais dos
-serviços. Execute cada comando no servidor. As configurações da loja e do
-inventário exigem `JWT_SIGNING_KEY`, portanto informe a chave em cada terminal:
+serviços. Execute cada terminal dos servidores:
 
 ```bash
-cd /caminho/para/Mochila_do_Goblin/mochila_goblin
-read -rsp 'JWT_SIGNING_KEY: ' JWT_SIGNING_KEY; echo; export JWT_SIGNING_KEY
-../venv/bin/python manage.py migrate
+python manage.py migrate
 ```
+
+## 3. Iniciar a loja
+
+No terminal de mochila_goblin ative o servidor na porta 8001
+
 
 ```bash
-cd /caminho/para/Mochila_do_Goblin/inventario
-read -rsp 'JWT_SIGNING_KEY: ' JWT_SIGNING_KEY; echo; export JWT_SIGNING_KEY
-../venv/bin/python manage.py migrate
+python manage.py runserver 127.0.0.1:8001
 ```
 
-O inventário inclui uma migração inicial do modelo da mochila. Confirme que
-`migrate` a aplicou sem erros antes de iniciar os serviços.
+## 4. Iniciar o inventario
 
-## 3. Iniciar o inventário
-
-Em um terminal no servidor:
+No terminal de inventario ative o servidor na porta 8002
 
 ```bash
-cd /caminho/para/Mochila_do_Goblin/inventario
-read -rsp 'JWT_SIGNING_KEY: ' JWT_SIGNING_KEY; echo; export JWT_SIGNING_KEY
-../venv/bin/python manage.py runserver 127.0.0.1:8002
+python manage.py runserver 127.0.0.1:8002
 ```
-
-Informe a mesma chave usada na loja. Mantenha esse terminal aberto enquanto o
-serviço estiver em execução.
-
-## 4. Iniciar a loja
-
-Em outro terminal no servidor:
-
-```bash
-cd /caminho/para/Mochila_do_Goblin/mochila_goblin
-read -rsp 'JWT_SIGNING_KEY: ' JWT_SIGNING_KEY; echo; export JWT_SIGNING_KEY
-../venv/bin/python manage.py runserver 127.0.0.1:8001
-```
-
-Informe exatamente a mesma chave usada no inventário. Mantenha esse terminal
-aberto também.
 
 ## 5. Iniciar o gateway para a rede local
 
 Descubra o endereço IP do servidor na rede:
 
+Linux:
 ```bash
 hostname -I
 ```
 
-Escolha o IP que os computadores clientes podem alcançar (por exemplo,
-`192.168.1.50`) e permita-o em `DJANGO_ALLOWED_HOSTS`. Em um terceiro terminal:
-
+Windows:
 ```bash
-cd /caminho/para/Mochila_do_Goblin/api_gateway
-DJANGO_ALLOWED_HOSTS='localhost,127.0.0.1,192.168.1.50' \
-  ../venv/bin/python manage.py runserver 0.0.0.0:8000
+ipconfig
 ```
 
-Substitua `192.168.1.50` pelo endereço real do servidor. O endereço precisa
-estar em `DJANGO_ALLOWED_HOSTS`, caso contrário o Django pode responder
-`400 Bad Request`. `0.0.0.0` faz o gateway escutar nas interfaces de rede; não
-significa que esse endereço seja usado pelo cliente.
+Escolha o IP que os computadores clientes podem alcançar (por exemplo,
+`192.168.1.50`) e permita-o em `DJANGO_ALLOWED_HOSTS`. No terminal do projeto api_gateway:
 
-As variáveis de ambiente valem para o terminal e os processos iniciados por
-ele. Ao reiniciar a loja ou o inventário, informe novamente a chave no
-respectivo terminal.
+```bash
+DJANGO_ALLOWED_HOSTS='localhost,127.0.0.1,192.168.1.50' 
+
+```
+e depois ative o servidor:
+
+```bash
+python manage.py runserver 0.0.0.0:8000
+```
+
+
+
+Substitua `192.168.1.50` pelo endereço real do servidor. O endereço precisa estar em `DJANGO_ALLOWED_HOSTS`, caso contrário o Django pode responder `400 Bad Request`. `0.0.0.0` faz o gateway escutar nas interfaces de rede; 
+
 
 ## 6. Acessar pelo cliente
 
 
-No computador cliente, configure o endereço-base da aplicação para o IP do
-servidor e a porta do gateway, por exemplo:
+No computador cliente, configure o endereço-base da aplicação para o IP do servidor e a porta do gateway, por exemplo:
 
 ```text
 http://192.168.1.50:8000
@@ -133,8 +121,6 @@ Para abrir a documentação Swagger das rotas públicas, acesse:
 http://192.168.1.50:8000/api/v1/docs/
 ```
 
-Substitua `192.168.1.50` pelo endereço IP real do servidor.
-
 Para autenticação, o endpoint do emissor está em:
 
 ```text
@@ -146,5 +132,3 @@ Para renovar tokens, use:
 ```text
 POST http://192.168.1.50:8000/api/v1/token/refresh/
 ```
-
-As chamadas da loja e do inventário também devem passar pelo gateway. 
