@@ -43,3 +43,9 @@ class CompraItemView(APIView):
         except ValidationError as e:
             return Response({"erro": str(e.detail)},status=status.HTTP_400_BAD_REQUEST)
 
+
+## View para vender itens 
+
+## View para listar itens da loja
+
+## View para consultar saldo
