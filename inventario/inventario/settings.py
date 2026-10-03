@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-z4qbw1gh$tuh21lx%hhgd^fumqzmmloxkxpzq@e&@+dco!1%wj'
-SIGNING_KEY = os.environ.get("SIGNING_KEY", SECRET_KEY)
+JWT_SIGNING_KEY = os.environ["JWT_SIGNING_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -148,7 +148,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'SIGNING_KEY': SIGNING_KEY,
+    'SIGNING_KEY': JWT_SIGNING_KEY,
     'ALGORITHM': 'HS256',
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),

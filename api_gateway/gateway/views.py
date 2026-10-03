@@ -11,7 +11,8 @@ class ProxyNegociarView(APIView):
     """
     Redireciona a requisição para o serviço de negociação (:8001)
     """
-    permission_classes = []  # Permite login/auth e deixa a validação do JWT para o serviço :8001
+    authentication_classes = []
+    permission_classes = []  # A validação da autenticação fica a cargo do serviço :8001
 
     def get(self, request, path=""):
         url = f"{NEGOCIAR_SERVICE_URL}/api/v1/{path}"
@@ -40,6 +41,7 @@ class ProxyInventario(APIView):
     """
     Redireciona a requisição para o serviço da mochila (:8002)
     """
+    authentication_classes = []
     permission_classes = []  # A validação do JWT fica a cargo do serviço :8002
 
     def get(self, request, path=""):
