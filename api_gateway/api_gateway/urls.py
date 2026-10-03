@@ -35,18 +35,23 @@ urlpatterns = [
     path('api/v1/docs/',SpectacularSwaggerView.as_view(url_name='schema'),name='swagger-ui'),
     path('api/v1/redoc/',SpectacularRedocView.as_view(url_name ='schema'), name ='redoc'),
 
-    # Rotas proxy para os Microserviços
-    #path('api/v1/loja/<path:path>', ProxyNegociarView.as_view(), name = 'proxy_negociar' ),
-    #path('api/v1/mochila<path:path>',ProxyVerMochila.as_view(),name = 'proxy_mochila'),
-    
-    
-    # Repassa pedidos de LOGIN para o Negociar Service(mochila_goblin)  (:8001)
-    path('api/v1/<path:path>', ProxyNegociarView.as_view(), name='proxy_auth'),
-
-    # Repassa LOJA para o Negociar Service(mochila_goblin) (:8001)
+    # Encaminha chamadas da loja, como comprar/ e venda/, ao serviço mochila_goblin.
     path('api/v1/loja/<path:path>', ProxyNegociarView.as_view(), name='proxy_negociar'),
 
-    # Repassa MOCHILA para o Ver o Inventario (:8002) 
+    # Encaminha a consulta da mochila. Como não há caminho adicional, passa path=""
+    # para que o inventário receba a rota interna /api/v1/.
+    path(
+        'api/v1/mochila/',
+        ProxyInventario.as_view(),
+        {'path': ''},
+        name='proxy_inventario_root',
+    ),
+
+    # Encaminha operações da mochila, como atualizar/, ao serviço de inventário.
     path('api/v1/mochila/<path:path>', ProxyInventario.as_view(), name='proxy_inventario'),
+
+    # Proxy genérico para login, refresh e demais endpoints do emissor.
+    # Deve ficar por último para não capturar antes as rotas específicas acima.
+    path('api/v1/<path:path>', ProxyNegociarView.as_view(), name='proxy_auth'),
 
 ]

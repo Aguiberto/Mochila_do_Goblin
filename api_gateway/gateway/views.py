@@ -45,7 +45,7 @@ class ProxyInventario(APIView):
     permission_classes = []  # A validação do JWT fica a cargo do serviço :8002
 
     def get(self, request, path=""):
-        url = f"{MOCHILA_SERVICE_URL}/api/v1/mochila/{path}"
+        url = f"{MOCHILA_SERVICE_URL}/api/v1/{path}"
         headers = {'Authorization': request.headers.get('Authorization', '')}
 
         try:
@@ -56,7 +56,7 @@ class ProxyInventario(APIView):
             return Response({"erro": "Serviço 'Ver Mochila' indisponível."}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
     def post(self, request, path=""):
-        url = f"{MOCHILA_SERVICE_URL}/api/v1/mochila/{path}"
+        url = f"{MOCHILA_SERVICE_URL}/api/v1/{path}"
         headers = {'Authorization': request.headers.get('Authorization', '')}
 
         try:
