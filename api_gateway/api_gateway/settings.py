@@ -168,6 +168,15 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0',
     'SERVE_INCLUDE_SCHEMA': False,
     'SECURITY': [{'BearerAuth': []}],
+    'APPEND_COMPONENTS': {
+        'securitySchemes': {
+            'BearerAuth': {
+                'type': 'http',
+                'scheme': 'bearer',
+                'bearerFormat': 'JWT',
+            },
+        },
+    },
     'SECURITY_DEFINITIONS': {
         'BearerAuth':{
             'type': 'apiKey',

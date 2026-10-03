@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     # bibliotecas
     'rest_framework',
     'rest_framework_simplejwt',
+    'drf_spectacular',
 
     # aplicações
     'comercio',
@@ -150,6 +151,22 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Mochila do Goblin - Loja API',
+    'DESCRIPTION': 'API do serviço da loja Mochila do Goblin.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SECURITY': [{'BearerAuth': []}],
+    'SECURITY_DEFINITIONS': {
+        'BearerAuth': {
+            'type': 'http',
+            'scheme': 'bearer',
+            'bearerFormat': 'JWT',
+        },
+    },
 }
 
 SIMPLE_JWT = {

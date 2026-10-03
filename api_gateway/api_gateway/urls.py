@@ -16,7 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from gateway.views import ProxyNegociarView, ProxyInventario
+from gateway.views import (
+    ProxyAtualizarMochilaView,
+    ProxyCompraView,
+    ProxyConsultarMochilaView,
+    ProxyTokenRefreshView,
+    ProxyTokenView,
+    ProxyVendaView,
+)
 
 
 from drf_spectacular.views import(
@@ -35,23 +42,28 @@ urlpatterns = [
     path('api/v1/docs/',SpectacularSwaggerView.as_view(url_name='schema'),name='swagger-ui'),
     path('api/v1/redoc/',SpectacularRedocView.as_view(url_name ='schema'), name ='redoc'),
 
-    # Encaminha chamadas da loja, como comprar/ e venda/, ao serviço mochila_goblin.
-    path('api/v1/loja/<path:path>', ProxyNegociarView.as_view(), name='proxy_negociar'),
-
-    # Encaminha a consulta da mochila. Como não há caminho adicional, passa path=""
-    # para que o inventário receba a rota interna /api/v1/.
+    # Login e refresh são públicos; a loja valida as credenciais e os tokens.
+    path('api/v1/token/', ProxyTokenView.as_view(), name='proxy_token'),
     path(
-        'api/v1/mochila/',
-        ProxyInventario.as_view(),
-        {'path': ''},
-        name='proxy_inventario_root',
+        'api/v1/token/refresh/',
+        ProxyTokenRefreshView.as_view(),
+        name='proxy_token_refresh',
     ),
 
-    # Encaminha operações da mochila, como atualizar/, ao serviço de inventário.
-    path('api/v1/mochila/<path:path>', ProxyInventario.as_view(), name='proxy_inventario'),
+    # Operações públicas da loja, protegidas pelo access token.
+    path('api/v1/loja/comprar/', ProxyCompraView.as_view(), name='proxy_comprar'),
+    path('api/v1/loja/venda/', ProxyVendaView.as_view(), name='proxy_venda'),
 
-    # Proxy genérico para login, refresh e demais endpoints do emissor.
-    # Deve ficar por último para não capturar antes as rotas específicas acima.
-    path('api/v1/<path:path>', ProxyNegociarView.as_view(), name='proxy_auth'),
+    # Operações públicas do inventário, protegidas pelo access token.
+    path(
+        'api/v1/mochila/',
+        ProxyConsultarMochilaView.as_view(),
+        name='proxy_inventario_root',
+    ),
+    path(
+        'api/v1/mochila/atualizar/',
+        ProxyAtualizarMochilaView.as_view(),
+        name='proxy_inventario_atualizar',
+    ),
 
 ]

@@ -19,6 +19,12 @@ from django.urls import path,include
 from rest_framework_simplejwt.views import(
     TokenObtainPairView,
     TokenRefreshView)
+from rest_framework.permissions import AllowAny
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularRedocView,
+    SpectacularSwaggerView,
+)
 
 
 urlpatterns = [
@@ -26,6 +32,23 @@ urlpatterns = [
     # Endpoints JWT
     path('api/v1/token/',TokenObtainPairView.as_view(), name = 'par_token'),
     path('api/v1/token/refresh/', TokenRefreshView.as_view(), name = 'token_refresh'),
+
+    # Documentação OpenAPI local do serviço da loja.
+    path(
+        'api/v1/schema/',
+        SpectacularAPIView.as_view(permission_classes=[AllowAny]),
+        name='schema',
+    ),
+    path(
+        'api/v1/docs/',
+        SpectacularSwaggerView.as_view(url_name='schema'),
+        name='swagger-ui',
+    ),
+    path(
+        'api/v1/redoc/',
+        SpectacularRedocView.as_view(url_name='schema'),
+        name='redoc',
+    ),
     
     path('admin/', admin.site.urls),
     path('api/v1/', include('comercio.urls') ),

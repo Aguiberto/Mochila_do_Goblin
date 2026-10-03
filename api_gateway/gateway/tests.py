@@ -4,7 +4,16 @@ from django.test import Client, SimpleTestCase, override_settings
 from django.urls import resolve
 from rest_framework.test import APIRequestFactory
 
-from .views import ProxyInventario, ProxyNegociarView
+from .views import (
+    ProxyAtualizarMochilaView,
+    ProxyCompraView,
+    ProxyConsultarMochilaView,
+    ProxyInventario,
+    ProxyNegociarView,
+    ProxyTokenRefreshView,
+    ProxyTokenView,
+    ProxyVendaView,
+)
 
 
 class ProxyAuthenticationTests(SimpleTestCase):
@@ -59,15 +68,12 @@ class PublicRouteMappingTests(SimpleTestCase):
 
     def test_rotas_publicas_resolvem_para_o_proxy_correto(self):
         routes = [
-            ("/api/v1/loja/comprar/", ProxyNegociarView, "proxy_negociar"),
-            ("/api/v1/loja/venda/", ProxyNegociarView, "proxy_negociar"),
-            ("/api/v1/mochila/", ProxyInventario, "proxy_inventario_root"),
-            (
-                "/api/v1/mochila/atualizar/",
-                ProxyInventario,
-                "proxy_inventario",
-            ),
-            ("/api/v1/token/refresh/", ProxyNegociarView, "proxy_auth"),
+            ("/api/v1/token/", ProxyTokenView, "proxy_token"),
+            ("/api/v1/token/refresh/", ProxyTokenRefreshView, "proxy_token_refresh"),
+            ("/api/v1/loja/comprar/", ProxyCompraView, "proxy_comprar"),
+            ("/api/v1/loja/venda/", ProxyVendaView, "proxy_venda"),
+            ("/api/v1/mochila/", ProxyConsultarMochilaView, "proxy_inventario_root"),
+            ("/api/v1/mochila/atualizar/", ProxyAtualizarMochilaView, "proxy_inventario_atualizar"),
         ]
 
         for path, expected_view, expected_name in routes:
@@ -90,7 +96,7 @@ class PublicRouteMappingTests(SimpleTestCase):
             with self.subTest(path=public_path):
                 match = resolve(public_path)
                 request = self.factory.post(public_path, {}, format="json")
-                response = match.func(request, **match.kwargs)
+                response = match.func(request)
 
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(
@@ -108,7 +114,7 @@ class PublicRouteMappingTests(SimpleTestCase):
         public_path = "/api/v1/mochila/"
         match = resolve(public_path)
         request = self.factory.get(public_path)
-        response = match.func(request, **match.kwargs)
+        response = match.func(request)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
@@ -126,12 +132,69 @@ class PublicRouteMappingTests(SimpleTestCase):
         public_path = "/api/v1/mochila/atualizar/"
         match = resolve(public_path)
         request = self.factory.post(public_path, {}, format="json")
-        response = match.func(request, **match.kwargs)
+        response = match.func(request)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             mock_post.call_args.args[0],
             "http://localhost:8002/api/v1/atualizar/",
+        )
+
+
+class GatewayOpenAPITests(SimpleTestCase):
+    def test_schema_exibe_caminhos_publicos_e_bearer_somente_nas_rotas_protegidas(self):
+        from drf_spectacular.generators import SchemaGenerator
+
+        schema = SchemaGenerator().get_schema(request=None, public=True)
+        expected_paths = {
+            "/api/v1/token/",
+            "/api/v1/token/refresh/",
+            "/api/v1/loja/comprar/",
+            "/api/v1/loja/venda/",
+            "/api/v1/mochila/",
+            "/api/v1/mochila/atualizar/",
+        }
+
+        self.assertEqual(set(schema["paths"]), expected_paths)
+        expected_methods = {
+            "/api/v1/token/": {"post"},
+            "/api/v1/token/refresh/": {"post"},
+            "/api/v1/loja/comprar/": {"post"},
+            "/api/v1/loja/venda/": {"post"},
+            "/api/v1/mochila/": {"get"},
+            "/api/v1/mochila/atualizar/": {"post"},
+        }
+        for path, methods in expected_methods.items():
+            with self.subTest(path=path):
+                self.assertEqual(set(schema["paths"][path]), methods)
+        self.assertNotIn("security", schema["paths"]["/api/v1/token/"]["post"])
+        self.assertNotIn(
+            "security",
+            schema["paths"]["/api/v1/token/refresh/"]["post"],
+        )
+        for path in expected_paths - {
+            "/api/v1/token/",
+            "/api/v1/token/refresh/",
+        }:
+            with self.subTest(path=path):
+                self.assertEqual(
+                    schema["paths"][path][
+                        "get" if path == "/api/v1/mochila/" else "post"
+                    ]["security"],
+                    [{"BearerAuth": []}],
+                )
+
+        purchase_body = schema["paths"]["/api/v1/loja/comprar/"]["post"][
+            "requestBody"
+        ]["content"]["application/json"]["schema"]
+        self.assertEqual(purchase_body["$ref"], "#/components/schemas/OperacaoLojaRequest")
+        self.assertEqual(
+            schema["components"]["securitySchemes"]["BearerAuth"],
+            {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+            },
         )
 
 

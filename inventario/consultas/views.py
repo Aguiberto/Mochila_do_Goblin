@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers
 
 from .models import ItemMochila
 from .serializers import ItemMochilaSerializer, AtualizarMochilaSerializer
@@ -14,6 +16,7 @@ class ConsultarMochilaView(APIView):
     """Listar os itens da mochila do Aventureiro autenticado"""
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(responses=ItemMochilaSerializer(many=True))
     def get(self, request):
         itens = ItemMochila.objects.filter(
             usuario_id=request.user.id,
@@ -27,6 +30,19 @@ class AtualizarMochilaView(APIView):
     """Recebe chamadas de COMPRA ou VENDA do Negociar Service"""
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        request=AtualizarMochilaSerializer,
+        responses={
+            200: inline_serializer(
+                name='AtualizarMochilaResponse',
+                fields={'mensagem': serializers.CharField()},
+            ),
+            400: inline_serializer(
+                name='AtualizarMochilaErrorResponse',
+                fields={'erro': serializers.CharField()},
+            ),
+        },
+    )
     @transaction.atomic
     def post(self, request):
         serializer = AtualizarMochilaSerializer(data=request.data)
