@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-1fu5piwlv4r^4#41k!2l1l8%438x^i@)v*ke@hod=fof@r7@%a'
+SECRET_KEY = 'django-insecure-mdty&%=s3pgn33j309b_-&@7s3_d045emx)++%pl$9zh5)_2ss'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -137,7 +137,7 @@ MAILERS = {
 
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICANTION_CLASSES':(
+    'DEFAULT_AUTHENTICATION_CLASSES':(
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES':(

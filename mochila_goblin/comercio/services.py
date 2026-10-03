@@ -2,7 +2,7 @@ from .models import Transacao
 from rest_framework.exceptions import ValidationError
 import requests
 
-URL_SERVICO_MOCHILA = "http://localhost:8002/api/v1/mochila/atualizar/"
+URL_SERVICO_MOCHILA = "http://localhost:8002/api/v1/atualizar/"
 
 class Services():
 
@@ -27,7 +27,18 @@ class Services():
             'quantidade': qtd_solicitada,
             'operacao': 'ADICIONAR'
         }
-        res = requests.post(URL_SERVICO_MOCHILA, json=payload, headers=headers, timeout=5)
+        try:
+            res = requests.post(URL_SERVICO_MOCHILA, json=payload, headers=headers, timeout=5)
+        except requests.exceptions.RequestException:
+            raise ValidationError("Serviço 'Ver Mochila' indisponível no momento.")
+
+        if res.status_code != 200:
+            try:
+                dados_erro = res.json()
+            except requests.exceptions.JSONDecodeError:
+                dados_erro = {}
+            mensagem = dados_erro.get("erro", dados_erro.get("detail", "Não foi possível atualizar a mochila."))
+            raise ValidationError(mensagem)
         
         # atualiza o as moedas do aventureiro
         aventureiro.moedas_draconicas -= custo_total

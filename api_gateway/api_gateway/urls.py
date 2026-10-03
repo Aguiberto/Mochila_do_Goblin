@@ -16,11 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from gateway.views import ProxyNegociarView, ProxyVerMochila
+from gateway.views import ProxyNegociarView, ProxyInventario
 
-from rest_framework_simplejwt.views import(
-    TokenObtainPairView,
-    TokenRefreshView)
 
 from drf_spectacular.views import(
     SpectacularAPIView,
@@ -32,9 +29,6 @@ urlpatterns = [
 
     path('admin/', admin.site.urls),
 
-    # Endpoints JWT
-    path('api/v1/token',TokenObtainPairView.as_view(), name = 'par_token'),
-    path('api/v1/token/refresh/', TokenRefreshView.as_view(), name = 'token_refresh'),
 
     #Endpoints do Swaggeer / OpenAPI 3.0
     path('api/v1/schema/',SpectacularAPIView.as_view(),name='schema'),
@@ -42,7 +36,17 @@ urlpatterns = [
     path('api/v1/redoc/',SpectacularRedocView.as_view(url_name ='schema'), name ='redoc'),
 
     # Rotas proxy para os Microserviços
-    path('api/v1/loja/<path:path>', ProxyNegociarView.as_view(), name = 'proxy_negociar' ),
-    path('api/v1/mochila<path:path>',ProxyVerMochila.as_view(),name = 'proxy_mochila'),
+    #path('api/v1/loja/<path:path>', ProxyNegociarView.as_view(), name = 'proxy_negociar' ),
+    #path('api/v1/mochila<path:path>',ProxyVerMochila.as_view(),name = 'proxy_mochila'),
+    
+    
+    # Repassa pedidos de LOGIN para o Negociar Service(mochila_goblin)  (:8001)
+    path('api/v1/<path:path>', ProxyNegociarView.as_view(), name='proxy_auth'),
+
+    # Repassa LOJA para o Negociar Service(mochila_goblin) (:8001)
+    path('api/v1/loja/<path:path>', ProxyNegociarView.as_view(), name='proxy_negociar'),
+
+    # Repassa MOCHILA para o Ver o Inventario (:8002) 
+    path('api/v1/mochila/<path:path>', ProxyInventario.as_view(), name='proxy_inventario'),
 
 ]
