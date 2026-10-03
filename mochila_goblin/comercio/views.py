@@ -33,19 +33,47 @@ class CompraItemView(APIView):
 
         aventureiro,_ = Aventureiro.objects.get_or_create(usuario=request.user)
         item = get_object_or_404(Item, pk=item_id)
+        auth_header = request.headers.get('Authorization')
 
         try:
-            Services.comprar_item(item, qtd_itens, aventureiro)
+            Services.comprar_item(item, qtd_itens, aventureiro, auth_header)
             return Response({"mensagem": "Compra realizada com sucesso!",
                              "saldo": aventureiro.moedas_draconicas,
                              "estoque_goblin": item.estoque},
                              status=status.HTTP_200_OK)
         except ValidationError as e:
             return Response({"erro": str(e.detail)},status=status.HTTP_400_BAD_REQUEST)
+        
+        
+class VendaItemView(APIView):
 
+    '''
+    Realiza o processamento da venda de um item do aventureiro para o goblin
+    '''
+    permission_classes = [IsAuthenticated]
 
-## View para vender itens 
+    @transaction.atomic
+    def post(self, request):
 
-## View para listar itens da loja
+        serializer = OperacaoSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-## View para consultar saldo
+        item_id = serializer.validated_data['item_id']
+        qtd_itens = serializer.validated_data['quantidade']
+
+        aventureiro, _ = Aventureiro.objects.get_or_create(usuario=request.user)
+        item = get_object_or_404(Item, pk=item_id)
+        auth_header = request.headers.get('Authorization')
+
+        try:
+            valor_recebido = Services.vender_item(item, qtd_itens, aventureiro, auth_header)
+            return Response({
+                "mensagem": "Venda realizada com sucesso!",
+                "moedas_recebidas": valor_recebido,
+                "saldo": aventureiro.moedas_draconicas,
+                "estoque_goblin": item.estoque
+            }, status=status.HTTP_200_OK)
+
+        except ValidationError as e:
+            return Response({"erro": e.detail[0] if isinstance(e.detail, list) else str(e.detail)}, status=status.HTTP_400_BAD_REQUEST)

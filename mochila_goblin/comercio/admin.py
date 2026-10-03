@@ -11,14 +11,13 @@ class ItemAdmin(admin.ModelAdmin):
     readonly_fields = ('preco_venda',)
 
 @admin.register(Aventureiro)
-class AventureitoAdmin(admin.ModelAdmin):
-
-    list_display = ('id', 'nome', 'preco_compra', 'preco_venda', 'quantidade')
-    list_editable = '(moedas_draconicas)'
+class AventureiroAdmin(admin.ModelAdmin):
+    list_display = ('id', 'usuario', 'moedas_draconicas')
+    list_editable = ('moedas_draconicas',)
 
 @admin.register(Transacao)
 class TrasacaoAdmin(admin.ModelAdmin):
+    list_display = ('id', 'aventureiro', 'tipo', 'item', 'quantidade', 'valor_total', 'data_hora')
+    list_editable = ('quantidade',)
 
-    list_display = ('id','aventureito', 'tipo', 'item', 'quantidade', 'valor_total', 'data_hora')
-    list_editable = ('data_hora')
 

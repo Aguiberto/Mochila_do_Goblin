@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+venv*/
+
+# Django / project runtime
+*.log
+media/
+staticfiles/
+
+# Keep the project database and migrations tracked
+!**/db.sqlite3
+!**/migrations/
+!**/migrations/*.py
+!**/migrations/*.pyc
+
+# Environment / secrets
+.env
+.env.*
+.env.local
+
+# IDE/editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Coverage / test caches
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.tox/
+.nox/
+
+# Build / distribution
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Local tools / misc
+.mypy_cache/
+.ruff_cache/
+.pyre/
+
+# Optional: ignore migration files if you do not want to commit them
+# */migrations/*.py
+# */migrations/*.pyc

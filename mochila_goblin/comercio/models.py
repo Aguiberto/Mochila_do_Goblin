@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 
 class Aventureiro(models.Model):
 
-    usuario = models.OneToOneField(User, on_delete = models.CASCADE, related_name='aventureito')
+    usuario = models.OneToOneField(User, on_delete = models.CASCADE, related_name='aventureiro')
     moedas_draconicas = models.DecimalField(max_digits=12, decimal_places=2, default=1000.00)
 
     def __str__(self):
@@ -24,7 +24,7 @@ class Item(models.Model):
     preco_venda = models.DecimalField(
         max_digits=10, 
         decimal_places=2,
-        help_text="Valor pago para compra o item")
+        help_text="Valor da         item = models.ForeignKey(Item, on_delete=models.PROTECT)venda do item")
 
 
     @property
@@ -51,11 +51,11 @@ class Transacao(models.Model):
     ]
 
     aventureiro = models.ForeignKey(Aventureiro, on_delete=models.CASCADE)
-    item = models.CharField(Item, on_delete=models.PROTECT, null = False)
+    item = models.ForeignKey(Item, on_delete=models.PROTECT)
     tipo = models.CharField(max_length=6, choices=CHOICES)
     quantidade = models.IntegerField()
     valor_total = models.DecimalField(max_digits=10, decimal_places=2)
     data_hora = models.TimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"TIPO: {self.tipo} | ITEM: {self.item.nome} | ESTOUQE: {self.quantidade}"
+        return f"TIPO: {self.tipo} | ITEM: {self.item.nome} | ESTOQUE: {self.quantidade}"

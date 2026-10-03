@@ -1,54 +1,72 @@
 import requests
+from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
 NEGOCIAR_SERVICE_URL = "http://localhost:8001"
 MOCHILA_SERVICE_URL = "http://localhost:8002"
 
+
+class FrontendView(APIView):
+    permission_classes = []
+
+    def get(self, request):
+        return render(request, 'gateway/index.html')
+
+
 class ProxyNegociarView(APIView):
-
-    '''
-    Redireciona a requisição para a view de negociar
-    1. concatena a cria uma rota para o serviço que o usuário deseja
-    2. copia os dados da requisição do usuário (cabeçalho).
-
-    '''
-    permission_classes = [IsAuthenticated]
-
-    def get(self,request, path=""):
-
-        # Cria a nova URL para o serviço desejado
-        url=f"{NEGOCIAR_SERVICE_URL}/api/v1/loja/{path}"
-
-        # Copia o cabeçalho da requisição (onde fica o token jwt)
-        headers = {'Authorization':request.headers.get('Authorization')}
-
-        # resposta que vai ser enviado para o microserviço
-        response = request.get(url, headers=headers, params=request.query_params)
-        return Response(response.json(), status=response.status_code)
-
-    def post(self,request,path=""):
-
-        # Cria a nova URL para o serviço desejado
-        url=f"{NEGOCIAR_SERVICE_URL}/api/v1/loja/{path}"
-
-        # Captura e repassao token JWT
-        headers = {'Authorization':request.headers.get('Authorization')}
-
-        # cria a resposta a ser repassada
-        response = request.post(url, headers = headers, json=request.data)
-        return Response(response.json(), status=response.status_code)
-
-class ProxyVerMochila(APIView):
-
-    permission_classes = [IsAuthenticated]
+    """
+    Redireciona a requisição para o serviço de negociação (:8001)
+    """
+    permission_classes = []  # Permite login/auth e deixa a validação do JWT para o serviço :8001
 
     def get(self, request, path=""):
+        url = f"{NEGOCIAR_SERVICE_URL}/api/v1/{path}"
+        headers = {'Authorization': request.headers.get('Authorization', '')}
 
-        url = f"{MOCHILA_SERVICE_URL}/api/v1/{path}"
-        headers = {"Authorization": request.headers.get('Authorization')}
+        try:
+            # Correção: usa a biblioteca requests.get e não o request do Django
+            res = requests.get(url, headers=headers, params=request.query_params)
+            return Response(res.json(), status=res.status_code)
+        except requests.exceptions.RequestException:
+            return Response({"erro": "Serviço 'Negociar' indisponível."}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
-        response = request.get(url, headers=headers, parms=request.query_params)
-        return Response(response.json(),status=response.status_code)
+    def post(self, request, path=""):
+        url = f"{NEGOCIAR_SERVICE_URL}/api/v1/{path}"
+        headers = {'Authorization': request.headers.get('Authorization', '')}
+
+        try:
+            # Correção: usa requests.post
+            res = requests.post(url, headers=headers, json=request.data)
+            return Response(res.json(), status=res.status_code)
+        except requests.exceptions.RequestException:
+            return Response({"erro": "Serviço 'Negociar' indisponível."}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+
+class ProxyInventario(APIView):
+    """
+    Redireciona a requisição para o serviço da mochila (:8002)
+    """
+    permission_classes = []  # A validação do JWT fica a cargo do serviço :8002
+
+    def get(self, request, path=""):
+        url = f"{MOCHILA_SERVICE_URL}/api/v1/mochila/{path}"
+        headers = {'Authorization': request.headers.get('Authorization', '')}
+
+        try:
+            # Correção: usa requests.get e corrige o typo 'parms' -> 'params'
+            res = requests.get(url, headers=headers, params=request.query_params)
+            return Response(res.json(), status=res.status_code)
+        except requests.exceptions.RequestException:
+            return Response({"erro": "Serviço 'Ver Mochila' indisponível."}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+    def post(self, request, path=""):
+        url = f"{MOCHILA_SERVICE_URL}/api/v1/mochila/{path}"
+        headers = {'Authorization': request.headers.get('Authorization', '')}
+
+        try:
+            res = requests.post(url, headers=headers, json=request.data)
+            return Response(res.json(), status=res.status_code)
+        except requests.exceptions.RequestException:
+            return Response({"erro": "Serviço 'Ver Mochila' indisponível."}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
