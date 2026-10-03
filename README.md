@@ -1,4 +1,4 @@
-# Mochila do Goblin — execução em rede local
+# Mochila do Goblin — 
 
 Este guia descreve como executar o cliente em um computador e os três serviços
 (gateway, loja e inventário) em outro computador na mesma rede local. O cliente
@@ -20,9 +20,17 @@ porque os três processos rodam no mesmo servidor.
 
 ## 1. Preparar o servidor
 
-Copie ou clone o projeto para o servidor e instale as dependências conforme os
-arquivos de dependências do projeto. Os comandos abaixo assumem que o ambiente
-virtual `venv` está na raiz `Mochila_do_Goblin/`.
+Copie ou clone o projeto para o servidor. Na raiz `Mochila_do_Goblin/`, crie o
+ambiente virtual e instale as dependências:
+
+```bash
+cd /caminho/para/Mochila_do_Goblin
+python3 -m venv venv
+venv/bin/pip install -r requirements.txt
+```
+
+Os demais comandos deste guia assumem que o ambiente virtual `venv` está nessa
+raiz.
 
 Gere uma chave para assinar tokens uma única vez:
 
@@ -107,14 +115,8 @@ As variáveis de ambiente valem para o terminal e os processos iniciados por
 ele. Ao reiniciar a loja ou o inventário, informe novamente a chave no
 respectivo terminal.
 
-## 6. Configurar o firewall e acessar pelo cliente
+## 6. Acessar pelo cliente
 
-No firewall do servidor:
-
-- permita conexões TCP à porta `8000` somente a partir da rede cliente;
-- não exponha as portas `8001` e `8002` à rede;
-- mantenha a loja e o inventário vinculados a `127.0.0.1`, como nos comandos
-  acima.
 
 No computador cliente, configure o endereço-base da aplicação para o IP do
 servidor e a porta do gateway, por exemplo:
@@ -122,6 +124,16 @@ servidor e a porta do gateway, por exemplo:
 ```text
 http://192.168.1.50:8000
 ```
+
+## 7. Documentação
+
+Para abrir a documentação Swagger das rotas públicas, acesse:
+
+```text
+http://192.168.1.50:8000/api/v1/docs/
+```
+
+Substitua `192.168.1.50` pelo endereço IP real do servidor.
 
 Para autenticação, o endpoint do emissor está em:
 
@@ -135,5 +147,4 @@ Para renovar tokens, use:
 POST http://192.168.1.50:8000/api/v1/token/refresh/
 ```
 
-As chamadas da loja e do inventário também devem passar pelo gateway. Não use
-diretamente as portas `8001` ou `8002` no computador cliente.
+As chamadas da loja e do inventário também devem passar pelo gateway. 
