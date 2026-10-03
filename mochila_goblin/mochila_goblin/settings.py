@@ -43,6 +43,7 @@ INSTALLED_APPS = [
 
     # aplicações
     'comercio',
+    'inventario',
 ]
 
 MIDDLEWARE = [
