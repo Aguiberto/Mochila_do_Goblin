@@ -15,7 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path
 from gateway.views import (
     ProxyAtualizarMochilaView,
     ProxyCompraView,
@@ -23,6 +23,7 @@ from gateway.views import (
     ProxyTokenRefreshView,
     ProxyTokenView,
     ProxyVendaView,
+    proxy_tela_inventario,
 )
 
 
@@ -36,6 +37,7 @@ urlpatterns = [
 
     path('admin/', admin.site.urls),
 
+    path('inventario/', proxy_tela_inventario, name='inventario-tela'),
 
     #Endpoints do Swaggeer / OpenAPI 3.0
     path('api/v1/schema/',SpectacularAPIView.as_view(),name='schema'),
@@ -43,7 +45,11 @@ urlpatterns = [
     path('api/v1/redoc/',SpectacularRedocView.as_view(url_name ='schema'), name ='redoc'),
 
     # Login e refresh são públicos; a loja valida as credenciais e os tokens.
-    path('api/v1/token/', ProxyTokenView.as_view(), name='proxy_token'),
+    path(
+        'api/v1/token/',
+        ProxyTokenView.as_view(),
+        name='proxy_token',
+    ),
     path(
         'api/v1/token/refresh/',
         ProxyTokenRefreshView.as_view(),
