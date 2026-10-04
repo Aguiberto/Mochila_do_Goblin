@@ -1,5 +1,5 @@
 """
-URL configuration for mochila_goblin project.
+URL configuration for inventario project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/6.1/topics/http/urls/
@@ -15,10 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path,include
-from rest_framework_simplejwt.views import(
-    TokenObtainPairView,
-    TokenRefreshView)
+from django.urls import path, include
 from rest_framework.permissions import AllowAny
 from drf_spectacular.views import (
     SpectacularAPIView,
@@ -26,14 +23,10 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 
-
 urlpatterns = [
-    
-    # Endpoints JWT
-    path('api/v1/token/',TokenObtainPairView.as_view(), name = 'par_token'),
-    path('api/v1/token/refresh/', TokenRefreshView.as_view(), name = 'token_refresh'),
+    path('admin/', admin.site.urls),
 
-    # Documentação OpenAPI local do serviço da loja.
+    # Documentação OpenAPI local do serviço de inventário.
     path(
         'api/v1/schema/',
         SpectacularAPIView.as_view(permission_classes=[AllowAny]),
@@ -49,8 +42,6 @@ urlpatterns = [
         SpectacularRedocView.as_view(url_name='schema'),
         name='redoc',
     ),
-    
-    path('admin/', admin.site.urls),
-    path('api/v1/', include('comercio.urls') ),
 
+    path('api/v1/', include('consultas.urls') ),
 ]

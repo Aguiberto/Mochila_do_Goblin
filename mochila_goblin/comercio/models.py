@@ -7,7 +7,11 @@ from django.contrib.auth.models import User
 class Aventureiro(models.Model):
 
     usuario = models.OneToOneField(User, on_delete = models.CASCADE, related_name='aventureiro')
-    moedas_draconicas = models.DecimalField(max_digits=12, decimal_places=2, default=1000.00)
+    moedas_draconicas = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=Decimal("1000.00"),
+    )
 
     def __str__(self):
         return f"Nome: {self.usuario} | Saldo:{self.moedas_draconicas}"

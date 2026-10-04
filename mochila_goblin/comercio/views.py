@@ -5,6 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError
 from django.db import transaction
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers
 
 from .serializers import OperacaoSerializer
 from .models import Aventureiro, Item
@@ -21,6 +23,23 @@ class CompraItemView(APIView):
     '''
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        request=OperacaoSerializer,
+        responses={
+            200: inline_serializer(
+                name='CompraItemResponse',
+                fields={
+                    'mensagem': serializers.CharField(),
+                    'saldo': serializers.DecimalField(max_digits=10, decimal_places=2),
+                    'estoque_goblin': serializers.IntegerField(),
+                },
+            ),
+            400: inline_serializer(
+                name='CompraItemErrorResponse',
+                fields={'erro': serializers.CharField()},
+            ),
+        },
+    )
     @transaction.atomic
     def post(self,request):
 
@@ -52,6 +71,27 @@ class VendaItemView(APIView):
     '''
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        request=OperacaoSerializer,
+        responses={
+            200: inline_serializer(
+                name='VendaItemResponse',
+                fields={
+                    'mensagem': serializers.CharField(),
+                    'moedas_recebidas': serializers.DecimalField(
+                        max_digits=10,
+                        decimal_places=2,
+                    ),
+                    'saldo': serializers.DecimalField(max_digits=10, decimal_places=2),
+                    'estoque_goblin': serializers.IntegerField(),
+                },
+            ),
+            400: inline_serializer(
+                name='VendaItemErrorResponse',
+                fields={'erro': serializers.CharField()},
+            ),
+        },
+    )
     @transaction.atomic
     def post(self, request):
 

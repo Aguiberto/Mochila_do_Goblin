@@ -16,7 +16,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from gateway.views import FrontendView, ProxyNegociarView, ProxyInventario
+from gateway.views import (
+    ProxyAtualizarMochilaView,
+    ProxyCompraView,
+    ProxyConsultarMochilaView,
+    ProxyTokenRefreshView,
+    ProxyTokenView,
+    ProxyVendaView,
+    proxy_tela_inventario,
+)
 
 
 from drf_spectacular.views import(
@@ -30,22 +38,40 @@ urlpatterns = [
     path('', FrontendView.as_view(), name='frontend'),
     path('admin/', admin.site.urls),
 
+    path('inventario/', proxy_tela_inventario, name='inventario-tela'),
 
     #Endpoints do Swaggeer / OpenAPI 3.0
     path('api/v1/schema/',SpectacularAPIView.as_view(),name='schema'),
     path('api/v1/docs/',SpectacularSwaggerView.as_view(url_name='schema'),name='swagger-ui'),
     path('api/v1/redoc/',SpectacularRedocView.as_view(url_name ='schema'), name ='redoc'),
 
-    # Rotas proxy para os Microserviços
-    #path('api/v1/loja/<path:path>', ProxyNegociarView.as_view(), name = 'proxy_negociar' ),
-    #path('api/v1/mochila<path:path>',ProxyVerMochila.as_view(),name = 'proxy_mochila'),
-    
-    
-    # Repassa LOJA para o Negociar Service(mochila_goblin) (:8001)
-    path('api/v1/loja/<path:path>', ProxyNegociarView.as_view(), name='proxy_negociar'),
+    # Login e refresh são públicos; a loja valida as credenciais e os tokens.
+    path(
+        'api/v1/token/',
+        ProxyTokenView.as_view(),
+        name='proxy_token',
+    ),
+    path(
+        'api/v1/token/refresh/',
+        ProxyTokenRefreshView.as_view(),
+        name='proxy_token_refresh',
+    ),
 
-    # Repassa MOCHILA para o Ver o Inventario (:8002) 
-    path('api/v1/mochila/<path:path>', ProxyInventario.as_view(), name='proxy_inventario'),
+    # Operações públicas da loja, protegidas pelo access token.
+    path('api/v1/loja/comprar/', ProxyCompraView.as_view(), name='proxy_comprar'),
+    path('api/v1/loja/venda/', ProxyVendaView.as_view(), name='proxy_venda'),
+
+    # Operações públicas do inventário, protegidas pelo access token.
+    path(
+        'api/v1/mochila/',
+        ProxyConsultarMochilaView.as_view(),
+        name='proxy_inventario_root',
+    ),
+    path(
+        'api/v1/mochila/atualizar/',
+        ProxyAtualizarMochilaView.as_view(),
+        name='proxy_inventario_atualizar',
+    ),
 
     # Repassa pedidos de LOGIN para o Negociar Service(mochila_goblin)  (:8001)
     path('api/v1/<path:path>', ProxyNegociarView.as_view(), name='proxy_auth'),
