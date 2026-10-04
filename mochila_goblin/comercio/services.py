@@ -56,7 +56,7 @@ class Services():
             valor_total = custo_total
         )
 
-        return f"Venda realizada com sucesso! Volte sempre!"
+        return f"Compra realizada com sucesso! Volte sempre!"
 
     @staticmethod
     def vender_item(item, qtd_solicitada, aventureiro, auth_header):

@@ -1,0 +1,81 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mochila do Goblin | Terminal de negociações</title>
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body>
+    <main class="shell">
+        <section class="hero">
+            <div>
+                <span class="eyebrow">API Gateway · ambiente de testes</span>
+                <h1>Mochila do <span>Goblin</span></h1>
+                <p>Faça uma negociação e acompanhe a resposta dos microserviços em tempo real.</p>
+            </div>
+            <div class="status-pill"><i></i> Gateway online</div>
+        </section>
+
+        <section class="workspace">
+            <aside class="sidebar">
+                <div class="brand-mark">MG</div>
+                <nav aria-label="Navegação principal">
+                    <a class="nav-link active" href="#negociar"><b>↗</b> Negociar</a>
+                    <span class="nav-link disabled"><b>▣</b> Consultar <small>em breve</small></span>
+                </nav>
+                <div class="sidebar-note">
+                    <span class="dot"></span>
+                    <div><strong>Ambiente local</strong><br><small>Gateway :8000</small></div>
+                </div>
+            </aside>
+
+            <div class="content" id="negociar">
+                <div class="section-heading">
+                    <div>
+                        <span class="eyebrow">Operação</span>
+                        <h2>Negociar item</h2>
+                    </div>
+                    <span class="route-label" id="routeLabel">POST /api/v1/loja/compra/</span>
+                </div>
+
+                <div class="card auth-card">
+                    <div class="card-title">
+                        <div class="icon-badge purple">↪</div>
+                        <div><h3>Autenticação</h3><p>Obtenha um token no serviço de negociação.</p></div>
+                    </div>
+                    <form id="loginForm" class="login-form">
+                        <label>Usuário<input id="username" name="username" autocomplete="username" required placeholder="seu usuário"></label>
+                        <label>Senha<input id="password" name="password" type="password" autocomplete="current-password" required placeholder="••••••••"></label>
+                        <button class="button secondary" type="submit">Gerar token <span>→</span></button>
+                    </form>
+                    <div class="token-row"><span id="tokenState" class="token-state">Nenhum token carregado</span><button type="button" id="clearToken" class="text-button">Limpar</button></div>
+                </div>
+
+                <div class="card trade-card">
+                    <div class="tabs" role="tablist">
+                        <button type="button" class="tab active buy" data-operation="compra" role="tab" aria-selected="true">Comprar</button>
+                        <button type="button" class="tab sell" data-operation="venda" role="tab" aria-selected="false">Vender</button>
+                    </div>
+                    <form id="tradeForm">
+                        <div class="form-grid">
+                            <label>ID do item<input id="itemId" type="number" min="1" required placeholder="Ex.: 1"></label>
+                            <label>Quantidade<input id="quantity" type="number" min="1" value="1" required></label>
+                        </div>
+                        <div class="hint">A requisição será enviada pelo gateway para o microserviço correspondente.</div>
+                        <button class="button primary buy-action" id="tradeButton" type="submit">Confirmar compra <span>↗</span></button>
+                    </form>
+                </div>
+
+                <div class="card response-card">
+                    <div class="response-heading"><div><span class="eyebrow">Retorno</span><h3>Resposta da operação</h3></div><span id="responseStatus" class="response-status">Aguardando envio</span></div>
+                    <pre id="responseOutput"><span class="muted">O retorno da API aparecerá aqui.</span></pre>
+                </div>
+            </div>
+        </section>
+        <footer>As chamadas são feitas no mesmo domínio do gateway para evitar configuração de CORS durante os testes.</footer>
+    </main>
+    <script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>
