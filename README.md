@@ -1,4 +1,4 @@
-# Mochila do Goblin — 
+# Mochila do Goblin 
 
 Este guia descreve como executar o cliente em um computador e os três serviços (gateway, loja e inventário) em outro computador na mesma rede local. O cliente acessa somente o gateway; a loja e o inventário permanecem internos ao servidor.
 
@@ -18,33 +18,65 @@ porque os três processos rodam no mesmo servidor.
 
 ## 1. Preparar o servidor
 
-Copie ou clone o projeto para o servidor. Na raiz `Mochila_do_Goblin/`, crie o
-ambiente virtual e instale as dependências:
+Copie ou clone o projeto para a máquina servidora. Na raiz do repositório`Mochila_do_Goblin/`, crie o ambiente virtual e instale as dependências:
 
 ```bash
 python3 -m venv venv
-venv/bin/pip install -r requirements.txt
 ```
 
-Os demais comandos deste guia assumem que o ambiente virtual `venv` está nessa
-raiz.
+Ative a venv:
+
+Linux:
+```bash
+source venv/bin/activate
+```
+Windows
+```bash
+.\venv\Scripts\Activate.ps1
+```
+Instale as depêndencias:
+
+```bash
+pip install -r requirements.txt
+```
+
+Os demais comandos deste guia assumem que o ambiente virtual `venv` está nessa raiz.
 
 Gere uma chave para assinar tokens uma única vez:
 
+Linux
 ```bash
 openssl rand -hex 32
 ```
 
+Windows
+```bash
+python -c "import secrets; print(secrets.token_hex(32))"
+```
+
  Use o resultado como`JWT_SIGNING_KEY` na loja e no inventário. 
 
- Abra o terminal de cada projeto, rode o comando a seguir e depois insira a chave. As configurações da loja e do
+ Abra o terminal de cada microserviço, lembre-se de ativar o venv, rode o comando a seguir inserindo a chave. As configurações da loja e do
 inventário exigem `JWT_SIGNING_KEY`, portanto informe a chave em cada terminal:
 
+Linux
  ```bash
 
 read -rsp 'JWT_SIGNING_KEY: ' JWT_SIGNING_KEY; echo; export JWT_SIGNING_KEY
 
 ```
+
+Windows
+```bash
+$JWT_SIGNING_KEY = "insira_sua_chave_entre_as_aspas"
+
+$env:JWT_SIGNING_KEY = $JWT_SIGNING_KEY
+
+echo $env:JWT_SIGNING_KEY
+
+
+```
+
 
 ## 2. Aplicar as migrações
 
@@ -89,10 +121,18 @@ ipconfig
 Escolha o IP que os computadores clientes podem alcançar (por exemplo,
 `192.168.1.50`) e permita-o em `DJANGO_ALLOWED_HOSTS`. No terminal do projeto api_gateway:
 
+!!Entre no terminal de api_gateway!!
+
+Linux
 ```bash
 DJANGO_ALLOWED_HOSTS='localhost,127.0.0.1,192.168.1.50' 
-
 ```
+
+Windows:
+```bash
+$env:DJANGO_ALLOWED_HOSTS="localhost,127.0.0.1,192.168.1.72"
+```
+
 e depois ative o servidor:
 
 ```bash
