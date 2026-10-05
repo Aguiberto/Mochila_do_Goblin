@@ -23,6 +23,8 @@ from gateway.views import (
     ProxyTokenRefreshView,
     ProxyTokenView,
     ProxyVendaView,
+    ProxyNegociarView,
+    frontend,
     proxy_tela_inventario,
 )
 
@@ -35,7 +37,7 @@ from drf_spectacular.views import(
 
 urlpatterns = [
 
-    path('', FrontendView.as_view(), name='frontend'),
+    path('', frontend, name='frontend'),
     path('admin/', admin.site.urls),
 
     path('inventario/', proxy_tela_inventario, name='inventario-tela'),
@@ -74,6 +76,6 @@ urlpatterns = [
     ),
 
     # Repassa pedidos de LOGIN para o Negociar Service(mochila_goblin)  (:8001)
-    path('api/v1/<path:path>', ProxyNegociarView.as_view(), name='proxy_auth'),
+    # path('api/v1/<path:path>', ProxyNegociarView.as_view(), name='proxy_auth'),
 
 ]

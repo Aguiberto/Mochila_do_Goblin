@@ -15,7 +15,8 @@ function updateOperation(operation) {
         tab.classList.toggle('active', active);
         tab.setAttribute('aria-selected', active);
     });
-    $('#routeLabel').textContent = `POST /api/v1/loja/${operation}/`;
+    const publicOperation = operation === 'compra' ? 'comprar' : operation;
+    $('#routeLabel').textContent = `POST /api/v1/loja/${publicOperation}/`;
     $('#tradeButton').textContent = `Confirmar ${isBuy ? 'compra' : 'venda'} `;
     $('#tradeButton').className = `button primary ${isBuy ? 'buy-action' : 'sell-action'}`;
     $('#tradeButton').insertAdjacentHTML('beforeend', '<span>↗</span>');
@@ -34,8 +35,64 @@ function setToken(token) {
     }
 }
 
+function showInventory(items) {
+    const body = $('#inventoryBody');
+    body.replaceChildren();
+
+    if (!items.length) {
+        body.innerHTML = '<tr><td colspan="3" class="empty-table">Sua mochila está vazia.</td></tr>';
+        return;
+    }
+
+    items.forEach((item) => {
+        const row = document.createElement('tr');
+        [item.nome_item, `#${item.item_id_loja}`, item.quantidade].forEach((value) => {
+            const cell = document.createElement('td');
+            cell.textContent = value;
+            row.appendChild(cell);
+        });
+        body.appendChild(row);
+    });
+}
+
+async function loadInventory() {
+    if (!state.token) {
+        showInventory([]);
+        $('#inventoryHint').textContent = 'Gere um token antes de consultar a mochila.';
+        $('#inventoryHint').className = 'inventory-hint error-text';
+        return;
+    }
+
+    const button = $('#inventoryButton');
+    button.disabled = true;
+    $('#inventoryHint').textContent = 'Consultando inventário...';
+    $('#inventoryHint').className = 'inventory-hint';
+
+    try {
+        const response = await fetch('/api/v1/mochila/', {
+            headers: { Authorization: `Bearer ${state.token}` },
+            cache: 'no-store',
+        });
+        const payload = await response.json();
+
+        if (!response.ok) {
+            throw new Error(payload.detail || payload.erro || 'Não foi possível consultar a mochila.');
+        }
+
+        showInventory(payload);
+        $('#inventoryHint').textContent = `${payload.length} item(ns) encontrado(s).`;
+    } catch (error) {
+        showInventory([]);
+        $('#inventoryHint').textContent = error.message;
+        $('#inventoryHint').className = 'inventory-hint error-text';
+    } finally {
+        button.disabled = false;
+    }
+}
+
 document.querySelectorAll('.tab').forEach((tab) => tab.addEventListener('click', () => updateOperation(tab.dataset.operation)));
 $('#clearToken').addEventListener('click', () => setToken(''));
+$('#inventoryButton').addEventListener('click', loadInventory);
 
 $('#loginForm').addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -57,9 +114,11 @@ $('#tradeForm').addEventListener('submit', async (event) => {
         return;
     }
     try {
-        const response = await fetch(`/api/v1/loja/${state.operation}/`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${state.token}` }, body: JSON.stringify({ item_id: Number($('#itemId').value), quantidade: Number($('#quantity').value) }) });
+        const publicOperation = state.operation === 'compra' ? 'comprar' : state.operation;
+        const response = await fetch(`/api/v1/loja/${publicOperation}/`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${state.token}` }, body: JSON.stringify({ item_id: Number($('#itemId').value), quantidade: Number($('#quantity').value) }) });
         const payload = await response.json();
         showResponse(payload, response.status, response.ok);
+        if (response.ok) loadInventory();
     } catch (error) {
         showResponse({ erro: 'Gateway indisponível ou sem resposta.' }, 0, false);
     }

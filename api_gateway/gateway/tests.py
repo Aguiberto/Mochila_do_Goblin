@@ -109,7 +109,7 @@ class PublicRouteMappingTests(SimpleTestCase):
         mock_post.return_value = remote_response
 
         for public_path, downstream_path in (
-            ("/api/v1/loja/comprar/", "comprar/"),
+            ("/api/v1/loja/comprar/", "compra/"),
             ("/api/v1/loja/venda/", "venda/"),
         ):
             with self.subTest(path=public_path):
@@ -225,5 +225,13 @@ class AllowedHostTests(SimpleTestCase):
         allowed_response = client.get("/", HTTP_HOST="192.0.2.10")
         rejected_response = client.get("/", HTTP_HOST="untrusted.example")
 
-        self.assertEqual(allowed_response.status_code, 404)
+        self.assertEqual(allowed_response.status_code, 200)
         self.assertEqual(rejected_response.status_code, 400)
+
+    def test_homepage_exibe_cliente_de_negociacao(self):
+        response = Client().get("/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Confirmar compra")
+        self.assertContains(response, "Consultar mochila")
+        self.assertContains(response, "Itens na mochila")

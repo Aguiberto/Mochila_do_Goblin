@@ -25,10 +25,6 @@ class Item(models.Model):
         max_digits=10, 
         decimal_places=2,
         help_text="Valor pago para compra o item")
-    preco_venda = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2,
-        help_text="Valor da         item = models.ForeignKey(Item, on_delete=models.PROTECT)venda do item")
 
 
     @property

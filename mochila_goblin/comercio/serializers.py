@@ -14,9 +14,9 @@ class ItemSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'nome',
-            'descricao'
-            'estoque'
-            'preco_venda'
+            'descricao',
+            'estoque',
+            'preco_venda',
         ]
 
 class OperacaoSerializer(serializers.Serializer):

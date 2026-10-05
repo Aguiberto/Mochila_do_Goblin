@@ -23,7 +23,7 @@
                 <div class="brand-mark">MG</div>
                 <nav aria-label="Navegação principal">
                     <a class="nav-link active" href="#negociar"><b>↗</b> Negociar</a>
-                    <span class="nav-link disabled"><b>▣</b> Consultar <small>em breve</small></span>
+                    <a class="nav-link" href="#inventario"><b>▣</b> Consultar</a>
                 </nav>
                 <div class="sidebar-note">
                     <span class="dot"></span>
@@ -37,7 +37,7 @@
                         <span class="eyebrow">Operação</span>
                         <h2>Negociar item</h2>
                     </div>
-                    <span class="route-label" id="routeLabel">POST /api/v1/loja/compra/</span>
+                    <span class="route-label" id="routeLabel">POST /api/v1/loja/comprar/</span>
                 </div>
 
                 <div class="card auth-card">
@@ -66,6 +66,33 @@
                         <div class="hint">A requisição será enviada pelo gateway para o microserviço correspondente.</div>
                         <button class="button primary buy-action" id="tradeButton" type="submit">Confirmar compra <span>↗</span></button>
                     </form>
+                </div>
+
+                <div class="card inventory-card" id="inventario">
+                    <div class="response-heading">
+                        <div>
+                            <span class="eyebrow">Inventário</span>
+                            <h3>Itens na mochila</h3>
+                        </div>
+                        <button class="button secondary compact-button" id="inventoryButton" type="button">
+                            Consultar mochila <span>↻</span>
+                        </button>
+                    </div>
+                    <p class="inventory-hint" id="inventoryHint">Use o mesmo token da autenticação para consultar seus itens.</p>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>ID do item</th>
+                                    <th>Quantidade</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryBody">
+                                <tr><td colspan="3" class="empty-table">Nenhuma consulta realizada.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <div class="card response-card">

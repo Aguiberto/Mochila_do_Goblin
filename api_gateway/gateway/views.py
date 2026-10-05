@@ -1,5 +1,6 @@
 import requests
 from django.http import HttpResponse
+from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -23,6 +24,10 @@ from .schema import (
 
 NEGOCIAR_SERVICE_URL = "http://localhost:8001"
 MOCHILA_SERVICE_URL = "http://localhost:8002"
+
+
+def frontend(request):
+    return render(request, "gateway/index.html")
 
 
 def proxy_tela_inventario(request):
@@ -159,7 +164,7 @@ class ProxyCompraView(ProxyNegociarView):
         },
     )
     def post(self, request):
-        return super().post(request, path="comprar/")
+        return super().post(request, path="compra/")
 
 
 class ProxyVendaView(ProxyNegociarView):
